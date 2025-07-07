@@ -1,0 +1,103 @@
+-- postgres sql
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    username VARCHAR(100) UNIQUE,
+    password VARCHAR(100)
+);
+
+CREATE TABLE provinces (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    full_name VARCHAR(150)
+);
+
+CREATE TABLE locations (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    id_province INTEGER REFERENCES provinces(id)
+);
+
+CREATE TABLE event_locations (
+    id SERIAL PRIMARY KEY,
+    id_location INTEGER REFERENCES locations(id),
+    name VARCHAR(100),
+    full_address TEXT,
+    max_capacity INTEGER,
+    latitude DECIMAL,
+    longitude DECIMAL,
+    id_creator_user INTEGER REFERENCES users(id)
+);
+
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    description TEXT,
+    id_event_location INTEGER REFERENCES event_locations(id),
+    start_date TIMESTAMP,
+    duration_in_minutes INTEGER,
+    price NUMERIC(10,2),
+    enabled_for_enrollment BOOLEAN,
+    max_assistance INTEGER,
+    id_creator_user INTEGER REFERENCES users(id)
+);
+
+CREATE TABLE event_enrollments (
+    id SERIAL PRIMARY KEY,
+    id_event INTEGER REFERENCES events(id),
+    id_user INTEGER REFERENCES users(id),
+    description TEXT,
+    registration_date_time TIMESTAMP,
+    attended BOOLEAN,
+    observations TEXT,
+    rating INTEGER
+);
+
+-- INSERCIONES
+
+-- Usuarios creadores
+INSERT INTO users (first_name, last_name, username, password) VALUES
+('Martina', 'Vega', 'martuvega', 'hashed_password_2'),
+('Julian', 'Schiffer', 'jschiffer', 'hashed_password_3'),
+('Camila', 'Ortiz', 'camiortiz', 'hashed_password_4'),
+('Nicolás', 'López', 'nlopez', 'hashed_password_5'),
+('Valentina', 'Ramírez', 'valenram', 'hashed_password_6');
+
+-- Provincias
+INSERT INTO provinces (name, full_name) VALUES
+('CABA', 'Ciudad Autónoma de Buenos Aires'),
+('Buenos Aires', 'Provincia de Buenos Aires'),
+('Córdoba', 'Provincia de Córdoba'),
+('Santa Fe', 'Provincia de Santa Fe'),
+('Mendoza', 'Provincia de Mendoza');
+
+-- Localidades
+INSERT INTO locations (name, id_province) VALUES
+('Nuñez', 1),
+('La Plata', 2),
+('Nueva Córdoba', 3),
+('Rosario Centro', 4),
+('Ciudad de Mendoza', 5);
+
+-- Lugares del evento
+INSERT INTO event_locations (
+    id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
+) VALUES
+(1, 'Club Atlético River Plate', 'Av. Pres. Figueroa Alcorta 7597', 84567, -34.54454505693356, -58.4494761175694, 2),
+(2, 'Estadio Único La Plata', 'Av. 32 y 25', 53000, -34.9212, -57.9541, 2),
+(3, 'Orfeo Superdomo', 'Cardeñosa 3450', 14000, -31.3884, -64.2004, 1),
+(4, 'Metropolitano Rosario', 'Junín 501', 10000, -32.9442, -60.6505, 3),
+(5, 'Auditorio Ángel Bustelo', 'Virgen del Carmen de Cuyo 610', 1800, -32.8895, -68.8458, 4);
+
+-- Eventos
+INSERT INTO events (
+    name, description, id_event_location, start_date, duration_in_minutes,
+    price, enabled_for_enrollment, max_assistance, id_creator_user
+) VALUES
+('Taylor Swift', 'Un alto show', 1, '2024-03-21 03:00:00', 210, 15500, TRUE, 120000, 2),
+('Coldplay', 'Música con luces de colores', 2, '2024-05-10 21:00:00', 180, 18000, TRUE, 53000, 2),
+('Tini Stoessel', 'Show para todas las edades', 3, '2024-06-01 20:00:00', 150, 12000, TRUE, 14000, 1),
+('Fito Páez', 'El amor después del amor en vivo', 4, '2024-07-15 20:30:00', 130, 9000, TRUE, 10000, 3),
+('Andrés Calamaro', 'Rock nacional clásico', 5, '2024-08-22 21:00:00', 120, 7500, TRUE, 1800, 4);
