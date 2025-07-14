@@ -1,7 +1,7 @@
 const config={
     user:'postgres',
     host:'localhost',
-    database:'tpfinaldai',
+    database:'tp',
     password:'root',
     port:'localhost'
 };
