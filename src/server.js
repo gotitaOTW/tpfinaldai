@@ -13,3 +13,6 @@ app.use('/api/event', EventRouter);
 app.listen(port,()=>{
     console.log(`Server listening on port ${port}`);
 })
+
+
+//arreglar node.js, las peticiones tienen algunas fallas, no funcionan en postman, no las puedo usar en el tp de efsi

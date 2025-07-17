@@ -4,7 +4,7 @@ const router=Router();
 const svc = new EventService();
 
 //2 y 3
-router.get('', async(req,res)=>{
+router.get('/', async(req,res)=>{
     let respuesta;
     let returnArray;
     const name=req.query.name;
