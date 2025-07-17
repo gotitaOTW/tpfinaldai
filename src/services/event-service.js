@@ -1,5 +1,7 @@
-import EventRepository from "../repositories/event-repository,"
-export default class EventService{
+import EventRepository from "../repositories/event-repository.js";
+
+
+ class EventService{
     getAllAsync=async()=>{
         const repo=new EventRepository();
         return await repo.getAllAsync();
@@ -10,7 +12,9 @@ export default class EventService{
         return await repo.getSomeAsync(filtros);
     }
     getByIdAsync=async(id)=>{
-        const repo = EventRepository();
+        const repo =new EventRepository();
         return await repo.getByIdAsync(id);
     }
 }
+
+export default EventService;

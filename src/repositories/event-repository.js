@@ -1,8 +1,8 @@
-import config from 'src/configs/db_config.js';
+import config from '../configs/db_config.js';
 import pkg from 'pg'
 const {Client,Pool} = pkg;
 
-export default class EventRepository{
+ class EventRepository{
     getAllAsync = async() =>
     {
         let returnArray = null;
@@ -64,7 +64,10 @@ export default class EventRepository{
         } catch (error) {
             console.log(error);
         }
+        
         return returnArray;
     }
       
 }
+
+export default EventRepository
