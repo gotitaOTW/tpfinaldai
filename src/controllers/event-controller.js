@@ -1,5 +1,5 @@
 import { Router } from "express";
-import EventService from "../services/event-service";
+import EventService from "../services/event-service.js";
 const router=Router();
 const svc = new EventService();
 
@@ -10,14 +10,14 @@ router.get('', async(req,res)=>{
     const name=req.query.name;
     const startdate=req.query.startdate;
     const texto=req.query.texto;
-
+    
     if(name||startdate||texto){//con filtros
         const filtros={};
         if(name){filtros.name=name;}
         if(startdate){filtros.startdate=startdate;}
         if(texto){filtros.texto=texto;}
 
-        returnArray=await svc.getSomeAync(filtros);
+        returnArray=await svc.getSomeAsync(filtros);
     }
     else{//sin filtros
         returnArray=await svc.getAllAsync();
