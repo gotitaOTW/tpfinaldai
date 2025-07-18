@@ -1,0 +1,21 @@
+El error "Error interno" que ves al ejecutar /api/events/ probablemente viene de la lógica en tu controlador y repositorio.
+Aquí está el motivo:
+¿Qué pasa en tu código?
+El controlador (event-controller.js) llama a svc.getAllAsync() si no hay filtros.
+getAllAsync() en el servicio llama a repo.getAllAsync().
+En el repositorio (event-repository.js), el método getAllAsync() ejecuta:
+Apply to db_config.js
+Es decir, está trayendo datos de la tabla provinces, no de events.
+¿Por qué da "Error interno"?
+Si la consulta falla o no hay datos, returnArray será null.
+El controlador revisa:
+Apply to db_config.js
+Si la consulta no devuelve nada (o hay un error), responde con "Error interno".
+¿Qué deberías revisar?
+¿Quieres que /api/events/ devuelva eventos?
+Deberías cambiar la consulta en getAllAsync a:
+Apply to db_config.js
+Verifica que la tabla provinces existe y tiene datos
+Si solo quieres eventos, cambia la consulta como arriba.
+Manejo de errores
+Actualmente, si hay un error, solo se imprime en consola y se retorna null. Podrías mejorar el manejo de errores para saber exactamente qué está fallando.
