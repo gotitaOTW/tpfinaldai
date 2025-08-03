@@ -15,6 +15,7 @@ import EventRepository from "../repositories/event-repository.js";
         const repo =new EventRepository();
         return await repo.getByIdAsync(id);
     }
+    
 }
 
 export default EventService;

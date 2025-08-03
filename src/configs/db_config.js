@@ -1,8 +1,10 @@
+import dotenv from 'dotenv';
+
 const config={
     user:'postgres',
     host:'localhost',
     database:'tp',
-    password:'root',
+    password:process.env.contrasenaBD,
     port:'localhost'
 };
-export default config
+export default config;

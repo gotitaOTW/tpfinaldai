@@ -57,6 +57,7 @@ router.get('/:id', async(req,res)=>{
     console.log(error);
     respuesta=res.status(500).json("Error interno");
     }
+    return respuesta;
 })
 
 export default router;
