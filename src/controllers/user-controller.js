@@ -1,12 +1,10 @@
 import { Router } from "express";
 import UserService from "../services/user-service.js";
-const router=Router();
+const router = Router();
 const svc = new UserService();
 
 //5
-router.get('/api/user/login', async(req,res)=>{
-    let respuesta;
-    let returnArray;
+router.post('/login', async(req,res)=>{
     const {user, password}= req.body;
 
 
@@ -21,6 +19,28 @@ router.get('/api/user/login', async(req,res)=>{
   }
 });
 
+router.post('register', async (req,res)=>{
+  let msjError;
+  const {first_name, last_name, username, password}=req.body;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!first_name || first_name.length < 3 || !last_name || last_name.length < 3) {msjError="Nombre o apellido tienen menos de 3 letras";}
+  else if (!password || password.length < 3) {msjError="La contraseña debe tener al menos 3 letras";}
+  else if (!emailRegex.test(username)) {msjError="El email no es válido";}
+
+  if(msjError!=null){
+    return res.status(400).json(msjError);
+  }
+
+  try {
+    await svc.registerAsync(first_name, last_name, username, password);
+    return res.status(201).json("Usuario registrado con éxito");
+  } catch (error) {
+    return res.status(401).json({ error: error.message });
+  }
+
+})
+
 //6
 
 //7
@@ -29,4 +49,6 @@ router.get('/api/user/login', async(req,res)=>{
 
 export default router;
 
-
+//recibe los datos por body, retorna 400 si faltan o no cumplen con 3 letras min etc
+//se los pasa al service que valida q no exista, caso contrario retorna 409
+//lo mete y devuelve 201

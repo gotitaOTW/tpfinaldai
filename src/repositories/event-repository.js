@@ -107,6 +107,47 @@ const {Client,Pool} = pkg;
         
         return returnArray;
     }
+
+
+    postEventAsync = async (idCreador, data) => {
+        const client = new Client(config);
+        try {
+            const sql = `
+                INSERT INTO events (
+                    name,
+                    description,
+                    id_event_location,
+                    start_date,
+                    duration_in_minutes,
+                    price,
+                    enabled_for_enrollment,
+                    max_assistance,
+                    id_creator_user
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+            `;
+            const values = [
+                data.name,
+                data.description,
+                data.id_event_location,
+                data.start_date,
+                data.duration_in_minutes,
+                data.price,
+                data.enabled_for_enrollment,
+                data.max_assistance,
+                idCreador
+            ];
+
+            await client.connect();
+            await client.query(sql, values);
+            await client.end();
+
+            return 'Evento creado exitosamente.';
+        } catch (error) {
+            throw error
+        }
+    };
+
       
 }
 
