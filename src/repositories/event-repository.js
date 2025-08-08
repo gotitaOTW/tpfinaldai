@@ -66,10 +66,12 @@ const {Client,Pool} = pkg;
                         e.enabled_for_enrollment,
                         e.max_assistance,
                     
-                        u.id AS idCreador,
-                        u.first_name AS nombreCreador,
-                        u.last_name AS apellidoCreador,
-                        u.username AS nombreDeUsuarioCreador,
+                        json_build_object(
+                            'id', u.id,
+                            'first_name', u.first_name,
+                            'last_name', u.last_name,
+                            'username', u.username
+                        ) AS creator,
                     
                         el.id AS idLugar,
                         el.name AS nombreLugar,
@@ -90,10 +92,10 @@ const {Client,Pool} = pkg;
                         p.longitude AS longitudProvincia
                     
                     FROM events e
-                    JOIN users u ON u.id = e.id_creator_user
-                    JOIN event_locations el ON el.id = e.id_event_location
-                    JOIN locations l ON l.id = el.id_location
-                    JOIN provinces p ON p.id = l.id_province
+                    INNER JOIN users u ON u.id = e.id_creator_user
+                    INNER JOIN event_locations el ON el.id = e.id_event_location
+                    INNER JOIN locations l ON l.id = el.id_location
+                    INNER JOIN provinces p ON p.id = l.id_province
                     WHERE e.id = $1`;
 
             values=[id];
@@ -145,6 +147,40 @@ const {Client,Pool} = pkg;
             return 'Evento creado exitosamente.';
         } catch (error) {
             throw error
+        }
+    };
+
+    hasEventRegistrations = async (eventId) => {
+        const client = new Client(config);
+        try {
+            await client.connect();
+            const sql = `SELECT COUNT(*) FROM event_registrations WHERE id_event = $1`;
+            const result = await client.query(sql, [eventId]);
+            await client.end();
+            
+            // Retorna true si hay al menos una inscripción
+            return parseInt(result.rows[0].count) > 0;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    };
+
+    deleteEventAsync = async (eventId) => {
+        const client = new Client(config);
+        try {
+            await client.connect();
+            const sql = `DELETE FROM events WHERE id = $1`;
+            const result = await client.query(sql, [eventId]);
+            await client.end();
+            
+            if (result.rowCount === 0) {
+                throw new Error('Evento no encontrado');
+            }
+            
+            return 'Evento eliminado exitosamente';
+        } catch (error) {
+            throw error;
         }
     };
 

@@ -20,7 +20,11 @@ import UserService from 'src/services/user-service.js'
     
     postEvent=async (token, data)=>{
         const payload=UserService.verificarToken(token);
-        if(!payload)throw new Error("Token inválido"); 
+        if(!payload){
+            const error = new Error("Mensaje de error");
+            error.statusCode=401;
+            return
+        }; 
         const repoUser = new UserRepository();
         const repoEvent = new EventRepository();
         const user=await repoUser.getUserByName(payload.username);

@@ -89,7 +89,7 @@ router.post('/', async (req,res)=>{
         return res.status(400).json({ error: "El precio no puede ser negativo." });
       }
 
-      const authHeader = req.get('Authorization');//saca el header
+      const authHeader = req.headers['Authorization'];//saca el header
         if (!authHeader) {
         return res.status(401).json({ error: 'Token no enviado' });//si no existe retorna 401
         }
@@ -110,6 +110,7 @@ router.post('/', async (req,res)=>{
           res.status(201).json(resultado);
         } catch (error) {
           res.status(error.statusCode || 500).json({ error: error.message });
+          //muestro el statusCode que le manda el svc a menos q no haya, en ese caso es porque es error de ls bd y retorna 500
         }
 
 })
@@ -130,7 +131,49 @@ router.post('/', async (req,res)=>{
 //valida el usuario, evento y que el usuario sea el creador del evento, caso contrario UNauthorized o not found el event
 //pide al repository q actualice datos
 
+//delete, lo mismo con borrar
+//controller: recibe token e id evento a eliminar, los valida minimamente y envia al svc. lo q reciba lo retorna con 200 a menos que 
+//
 
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    // Validaciones mínimas del controller
+    if (!id) {
+        return res.status(400).json({ error: 'El ID es requerido' });
+    }
+
+    if (isNaN(Number(id))) {
+        return res.status(400).json({ error: 'El ID debe ser un número' });
+    }
+
+    // Verificar token
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+        return res.status(401).json({ error: 'Token no enviado' });
+    }
+    const token = authHeader.split(' ')[1];
+
+    try {
+        // Llamar al servicio
+        const resultado = await svc.deleteEvent(token, Number(id));
+        
+        // Si llega aquí, fue exitoso
+        return res.status(200).json({ message: resultado });
+        
+    } catch (error) {
+        // Aquí es donde manejas los diferentes códigos de error
+        console.log('Error en delete event:', error);
+        
+        // Verificar si el error tiene un statusCode personalizado
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ error: error.message });
+        }
+        
+        // Error genérico si no tiene statusCode
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
 
 export default router;
 
