@@ -2,14 +2,45 @@ import config from '../configs/db_config.js';
 import pkg from 'pg'
 const {Client,Pool} = pkg;
 
- class EventRepository{
+class EventRepository{
     getAllAsync = async() =>
     {
         let returnArray = null;
         const client = new Client(config);
         try {
             await client.connect();
-            const sql = `SELECT * FROM provinces`;
+            const sql = `SELECT
+                e.name,
+                e.description,
+                e.start_date,
+                e.duration_in_minutes,
+                e.price,
+                e.enabled_for_enrollment,
+                e.max_assistance,
+                json_build_object(
+                    'name', el.name,
+                    'full_address', el.full_address,
+                    'max_capacity', el.max_capacity,
+                    'latitude', el.latitude,
+                    'longitude', el.longitude,
+                    'location', json_build_object(
+                    'name', l.name,
+                    'province', json_build_object(
+                        'name', p.name,
+                        'full_name', p.full_name
+                    )
+                    )
+                ) AS event_location,
+                json_build_object(
+                    'first_name', u.first_name,
+                    'last_name', u.last_name,
+                    'username', u.username
+                ) AS creator_user
+                FROM events e
+                INNER JOIN event_locations el ON el.id = e.id_event_location
+                INNER JOIN locations l ON l.id = el.id_location
+                INNER JOIN provinces p ON p.id = l.id_province
+                INNER JOIN users u ON u.id = e.id_creator_user;`;
             const result = await client.query(sql);
             await client.end();
             returnArray = result.rows;
@@ -24,7 +55,39 @@ const {Client,Pool} = pkg;
         const client = new Client(config);
         try {
             await client.connect();
-            let sql = `SELECT * FROM provinces WHERE 1=1`;
+            let sql = `SELECT
+                e.name,
+                e.description,
+                e.start_date,
+                e.duration_in_minutes,
+                e.price,
+                e.enabled_for_enrollment,
+                e.max_assistance,
+                json_build_object(
+                    'name', el.name,
+                    'full_address', el.full_address,
+                    'max_capacity', el.max_capacity,
+                    'latitude', el.latitude,
+                    'longitude', el.longitude,
+                    'location', json_build_object(
+                    'name', l.name,
+                    'province', json_build_object(
+                        'name', p.name,
+                        'full_name', p.full_name
+                    )
+                    )
+                ) AS event_location,
+                json_build_object(
+                    'first_name', u.first_name,
+                    'last_name', u.last_name,
+                    'username', u.username
+                ) AS creator_user
+                FROM events e
+                INNER JOIN event_locations el ON el.id = e.id_event_location
+                INNER JOIN locations l ON l.id = el.id_location
+                INNER JOIN provinces p ON p.id = l.id_province
+                INNER JOIN users u ON u.id = e.id_creator_user;
+                WHERE 1=1`;
             const values=[]
             let index=1;
 
@@ -150,22 +213,6 @@ const {Client,Pool} = pkg;
         }
     };
 
-    hasEventRegistrations = async (eventId) => {
-        const client = new Client(config);
-        try {
-            await client.connect();
-            const sql = `SELECT COUNT(*) FROM event_registrations WHERE id_event = $1`;
-            const result = await client.query(sql, [eventId]);
-            await client.end();
-            
-            // Retorna true si hay al menos una inscripción
-            return parseInt(result.rows[0].count) > 0;
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    };
-
     deleteEventAsync = async (eventId) => {
         const client = new Client(config);
         try {
@@ -183,6 +230,29 @@ const {Client,Pool} = pkg;
             throw error;
         }
     };
+
+    isUserSubscribedAsync = async (userId, eventId) => {
+        const client = new Client(config);
+        try {
+            const sql = `
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM event_registrations er
+                    WHERE er.id_event = $1 AND er.id_user = $2
+                ) AS subscribed
+            `;
+            const values = [eventId, userId];
+            await client.connect();
+            const result = await client.query(sql, values);
+            await client.end();
+            return Boolean(result.rows[0]?.subscribed);
+        } catch (error) {
+            await client.end();
+            throw error;
+        }
+    };
+
+    
 
       
 }

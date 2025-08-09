@@ -173,6 +173,28 @@ router.delete('/:id', async (req, res) => {
         // Error genérico si no tiene statusCode
         return res.status(500).json({ error: 'Error interno del servidor' });
     }
+
+    
+});
+
+//xtra
+router.get('/sub', async (req, res) => {
+    const { idUsuario, idEvento } = req.query;
+
+    if (!idUsuario || !idEvento) {
+        return res.status(400).json({ error: 'idUsuario e idEvento son requeridos' });
+    }
+    if (isNaN(Number(idUsuario)) || isNaN(Number(idEvento))) {
+        return res.status(400).json({ error: 'idUsuario e idEvento deben ser números' });
+    }
+
+    try {
+        const subscribed = await svc.isUserSubscribed(Number(idUsuario), Number(idEvento));
+        return res.status(200).json({ subscribed });
+    } catch (error) {
+        console.log('Error en subscription check:', error);
+        return res.status(500).json('Error interno');
+    }
 });
 
 export default router;

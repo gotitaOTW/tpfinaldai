@@ -39,6 +39,11 @@ import UserService from 'src/services/user-service.js'
             throw error;
         }
     }
+
+    isUserSubscribed = async (userId, eventId) => {
+        const repo = new EventRepository();
+        return await repo.isUserSubscribedAsync(userId, eventId);
+    }
 }
 
 
